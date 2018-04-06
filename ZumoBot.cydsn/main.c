@@ -52,7 +52,7 @@ int rread(void);
  * @details  ** Enable global interrupt since Zumo library uses interrupts. **<br>&nbsp;&nbsp;&nbsp;CyGlobalIntEnable;<br>
 */
 
-#if 1
+#if 0
 //battery level//
 int main()
 {
@@ -215,7 +215,7 @@ int main()
 #endif
 
 
-#if 0
+#if 1
 //motor//
 int main()
 {
@@ -223,11 +223,21 @@ int main()
     UART_1_Start();
 
     motor_start();              // motor start
-
-    motor_forward(100,2000);     // moving forward
-    motor_turn(200,50,2000);     // turn
-    motor_turn(50,200,2000);     // turn
-    motor_backward(100,2000);    // movinb backward
+//    motor_forward(200,2000);     // moving forward
+    motor_turn(190,200,1800);
+    motor_turn(200,0,400);     // turn
+    motor_turn(190,200,1600);
+    motor_turn(200,0,400);
+    motor_turn(190,200,2000);
+    motor_turn(200,0,400);
+    motor_turn(200,150,2000);
+    /*motor_forward(200,2000);
+    motor_turn(60,0,2000);
+    motor_forward(200,2000);
+    motor_turn(60,0,2000);
+    motor_turn(150,130,4000);*/
+    //motor_turn(0,-1,2000);     // turn
+  //motor_backward(255,2000);    // movinb backward
        
     motor_stop();               // motor stop
     
