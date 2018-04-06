@@ -217,27 +217,35 @@ int main()
 
 #if 1
 //motor//
+    void motor_turnRight(uint8 l_speed,uint8 r_speed,uint32 delay);
+    
 int main()
 {
     CyGlobalIntEnable; 
     UART_1_Start();
+    
+    CyDelay(1000);
 
-    motor_start();              // motor start
-//    motor_forward(200,2000);     // moving forward
-    motor_turn(190,200,1800);
-    motor_turn(200,0,400);     // turn
-    motor_turn(190,200,1600);
-    motor_turn(200,0,400);
-    motor_turn(190,200,2000);
-    motor_turn(200,0,400);
-    motor_turn(200,150,2000);
-    /*motor_forward(200,2000);
-    motor_turn(60,0,2000);
-    motor_forward(200,2000);
-    motor_turn(60,0,2000);
-    motor_turn(150,130,4000);*/
-    //motor_turn(0,-1,2000);     // turn
-  //motor_backward(255,2000);    // movinb backward
+    motor_start();
+    
+//    motor_forward(200,2000);
+    motor_turn(195,200,1800);
+   // motor_turn(200,0,400);
+    motor_turnRight(190,200,250);
+    motor_forward(0,1);
+    motor_turn(195,200,1600);
+   // motor_turn(200,0,400);
+    motor_turnRight(190,200,250);
+    motor_forward(0,1);
+    motor_turn(195,200,2000);
+   // motor_turn(200,0,400);
+    motor_turnRight(190,200,250);
+    motor_forward(0,1);
+    motor_turn(200,130,2000);
+    
+   // motor_forward(100,2000);     // moving forward
+   // motor_turn(0,200,2000);     // turn
+   // motor_backward(100,2000);    // moving backward
        
     motor_stop();               // motor stop
     
@@ -246,7 +254,54 @@ int main()
 
     }
 }
+
+void motor_turnRight(uint8 l_speed,uint8 r_speed,uint32 delay) {
+    MotorDirLeft_Write(0);
+    MotorDirRight_Write(1);
+    PWM_WriteCompare1(l_speed); 
+    PWM_WriteCompare2(r_speed); 
+    CyDelay(delay);
+}
 #endif
 
+#if 0 
+ //omat jutut//
+ int main()
+{
+    ADC_Battery_Start();        
 
+    int16 adcresult = 0;
+    float volts = 0.0;
+    
+    ADC_Battery_StartConvert();
+        if(ADC_Battery_IsEndConversion(ADC_Battery_WAIT_FOR_RESULT)) {   // wait for get ADC converted value
+            adcresult = ADC_Battery_GetResult16(); // get the ADC value (0 - 4095)
+            volts = (adcresult / 4096.0) * 5; // convert value to Volts
+            volts = volts * 1.5;
+            if (volts < 4.0) {
+                BatteryLed_Write(1);
+                CyDelay(500);
+                BatteryLed_Write(0);
+            }
+            printf("%d %.3f\r\n", adcresult, volts); // Print both ADC results and converted value
+        }
+        CyDelay(500);
+    
+    void motor_turnLeft(uint8 speed,uint32 delay) {
+    MotorDirLeft_Write(0);
+    MotorDirRight_Write(1);
+    PWM_WriteCompare1(speed); 
+    PWM_WriteCompare2(speed); 
+    CyDelay(delay);
+}
+    
+    void motor_turnRight(uint8 speed,uint32 delay) {
+    MotorDirLeft_Write(1);
+    MotorDirRight_Write(0);
+    PWM_WriteCompare1(speed); 
+    PWM_WriteCompare2(speed); 
+    CyDelay(delay);
+}
+}
+#endif
 /* [] END OF FILE */
