@@ -62,7 +62,7 @@ int main()
     
     ADC_Battery_Start();        
 
-    int16 adcresult =0;
+    int16 adcresult = 0;
     float volts = 0.0;
 
     printf("\nBoot\n");
@@ -75,16 +75,18 @@ int main()
     // SW1_Read() returns one when button is not pressed
 
     for(;;)
-    {
-        
+    { 
         ADC_Battery_StartConvert();
         if(ADC_Battery_IsEndConversion(ADC_Battery_WAIT_FOR_RESULT)) {   // wait for get ADC converted value
             adcresult = ADC_Battery_GetResult16(); // get the ADC value (0 - 4095)
-            // convert value to Volts
-            // you need to implement the conversion
-            
-            // Print both ADC results and converted value
-            printf("%d %f\r\n",adcresult, volts);
+            volts = (adcresult / 4096.0) * 5; // convert value to Volts
+            volts = volts * 1.5;
+            if (volts < 4.0) {
+                BatteryLed_Write(1);
+                CyDelay(500);
+                BatteryLed_Write(0);
+            }
+            printf("%d %.3f\r\n", adcresult, volts); // Print both ADC results and converted value
         }
         CyDelay(500);
         
