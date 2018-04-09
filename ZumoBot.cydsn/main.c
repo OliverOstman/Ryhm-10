@@ -182,40 +182,101 @@ int main()
 #endif
 
 
-#if 0
+#if 1
 //reflectance//
+    void motor_turnRight(uint8 l_speed,uint8 r_speed,uint32 delay);
+    
 int main()
 {
     struct sensors_ ref;
     struct sensors_ dig;
-
+    
     Systick_Start();
 
     CyGlobalIntEnable; 
     UART_1_Start();
-  
+    
     reflectance_start();
     reflectance_set_threshold(9000, 9000, 11000, 11000, 9000, 9000); // set center sensor threshold to 11000 and others to 9000
     
+    CyDelay(5000);
+    
+    motor_start();
 
     for(;;)
     {
         // read raw sensor values
         reflectance_read(&ref);
-        printf("%5d %5d %5d %5d %5d %5d\r\n", ref.l3, ref.l2, ref.l1, ref.r1, ref.r2, ref.r3);       // print out each period of reflectance sensors
+        printf("%5d %5d %5d %5d %5d %5d\r\n", ref.l3, ref.l2, ref.l1, ref.r1, ref.r2, ref.r3);   // print out each period of reflectance sensors
         
         // read digital values that are based on threshold. 0 = white, 1 = black
         // when blackness value is over threshold the sensors reads 1, otherwise 0
         reflectance_digital(&dig);      //print out 0 or 1 according to results of reflectance period
-        printf("%5d %5d %5d %5d %5d %5d \r\n", dig.l3, dig.l2, dig.l1, dig.r1, dig.r2, dig.r3);        //print out 0 or 1 according to results of reflectance period
+        printf("%5d %5d %5d %5d %5d %5d \r\n", dig.l3, dig.l2, dig.l1, dig.r1, dig.r2, dig.r3);  //print out 0 or 1 according to results of reflectance period
         
-        CyDelay(200);
-    }
-}   
+        if (dig.l1 == 1 && dig.r3 == 1 && dig.r2 == 1 && dig.r1 == 1 && dig.l3 == 1 && dig.l2 == 1) {
+            motor_stop();
+        }
+        else if (dig.l1 == 0 && dig.r3 == 0 && dig.r2 == 0 && dig.r1 == 0 && dig.l3 == 0 && dig.l2 == 0)  {
+            motor_stop();
+        }
+        else if (dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1 && dig.l3 == 0) { //90 asteen kääntö oikealle
+            motor_start();
+            CyDelay(50);
+            motor_turnRight(100,100,1);
+        }
+        else if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 1) { //3 sensorin kääntö vasemmalle
+            motor_start();
+            motor_turn(100,50,1);
+        }
+        else if (dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1) { //3 sensorin kääntö oikealle
+            motor_start();
+            motor_turn(50,100,1);
+        }
+        else if (dig.r1 == 1 && dig.r2 == 1) { //Oikealle pieni
+            motor_start();
+            motor_turn(90,65,1);
+        }
+        else if (dig.l1 == 1 && dig.l2 == 1) { //Vasemmalle pieni
+            motor_start();
+            motor_turn(65,90,1);
+        }
+        else if (dig.l3 == 1) {//Vasemmalle vikan sensorin käännös
+            motor_start();
+            motor_turn(85,100,1);
+        }
+        else if (dig.r3 == 1) {//Oikealle vikan sensorin käännös
+            motor_start();
+            motor_turn(100,85,1);
+        }
+        else if (dig.l1 == 1 && dig.r1 == 1) { //Suoraan
+            motor_start();
+            //motor_turn(190,200,1);
+            motor_forward(100,1);
+        }
+        else if (dig.l1 == 1 && dig.r1 == 0) { //Korjaus oikealle
+            motor_start();
+            motor_turn(75,100,1);
+        }
+        else if (dig.r1 == 1 && dig.l1 == 0) { //Korjaus vasemmalle
+            motor_start();
+            motor_turn(100,75,1);
+        }
+    }  
+}
+
+void motor_turnRight(uint8 l_speed,uint8 r_speed,uint32 delay) {
+    MotorDirLeft_Write(0);
+    MotorDirRight_Write(1);
+    PWM_WriteCompare1(l_speed); 
+    PWM_WriteCompare2(r_speed); 
+    CyDelay(delay);
+}
+        
 #endif
 
 
-#if 1
+#if 0
 //motor//
     void motor_turnRight(uint8 l_speed,uint8 r_speed,uint32 delay);
     
