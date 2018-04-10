@@ -184,7 +184,8 @@ int main()
 
 #if 1
 //reflectance//
-    void motor_turnRight(uint8 l_speed,uint8 r_speed,uint32 delay);
+    void motor_turnRight(uint8 speed,uint32 delay);
+    void motor_turnLeft(uint8 speed,uint32 delay);
     
 int main()
 {
@@ -214,6 +215,72 @@ int main()
         reflectance_digital(&dig);      //print out 0 or 1 according to results of reflectance period
         printf("%5d %5d %5d %5d %5d %5d \r\n", dig.l3, dig.l2, dig.l1, dig.r1, dig.r2, dig.r3);  //print out 0 or 1 according to results of reflectance period
         
+        if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1) {
+            //Kaikki näkee mustaa
+            motor_stop();
+        }
+        else if (dig.r2 == 1) {
+            //Oikealle
+            motor_start();
+            motor_turnRight(200,1);
+        }
+        else if (dig.l2 == 1) {
+            //Oikealle
+            motor_start();
+            motor_turnLeft(200,1);
+        }
+        else if (dig.l1 == 1 && dig.r1 == 1) {
+            // Suoraan
+            motor_start();
+            motor_forward(200,1);
+        }
+        
+        /* Versio 2
+        if (dig.l1 == 1 && dig.r3 == 1 && dig.r2 == 1 && dig.r1 == 1 && dig.l3 == 1 && dig.l2 == 1) {
+            //Kaikki näkee mustaa
+            motor_stop();
+        }
+        else if (dig.l1 == 0 && dig.r3 == 0 && dig.r2 == 0 && dig.r1 == 0 && dig.l3 == 0 && dig.l2 == 0)  {
+            //Kaikki näkee valkoista
+            motor_stop();
+        }
+        else if (dig.l1 == 1 && dig.r1 == 1 && dig.r3 == 0 && dig.r2 == 0 && dig.l3 == 0 && dig.l2 == 0) {
+            //Vain keskimmäiset näkee mustaa --> Suoraan
+            motor_start();
+            motor_turn(95,100,1);
+        }
+        else if (dig.l1 == 1 && dig.r1 == 0 && dig.r3 == 0 && dig.r2 == 0 && dig.l3 == 0 && dig.l2 == 0) {
+            //Vain keskimmäinen vasen näkee mustaa --> Korjaus vasemmalle
+            motor_start();
+            motor_turn(75,100,1);
+        }
+        else if (dig.r1 == 1 && dig.l1 == 0 && dig.r3 == 0 && dig.r2 == 0 && dig.l3 == 0 && dig.l2 == 0) {
+            //Vain keskimmäinen oikea näkee mustaa --> Korjaus oikealle
+            motor_start();
+            motor_turn(100,75,1);
+        }
+        else if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 1) { 
+            //Kaikki vasemmaiset näkee mustaa --> Kääntyy vasemmalle
+            motor_start();
+            motor_turn(35,100,1);
+        }
+        else if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 0) {
+            //Vain kaksi ekaa vasemmaista näkee mustaa --> Pienempi käännös vasemmalle
+            motor_start();
+            motor_turn(55,100,1);
+        }
+        else if (dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1) { 
+            //Kaikki oikeammaiset näkee mustaa --> Kääntyy oikealle
+            motor_start();
+            motor_turn(100,35,1);
+        }
+        else if (dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 0) {
+            //Vain kaksi ekaa oikeammaista näkee mustaa --> Pienempi käännös oikealle
+            motor_start();
+            motor_turn(100,55,1);
+        }
+        */
+        /* Versio 1
         if (dig.l1 == 1 && dig.r3 == 1 && dig.r2 == 1 && dig.r1 == 1 && dig.l3 == 1 && dig.l2 == 1) {
             motor_stop();
         }
@@ -241,6 +308,10 @@ int main()
             motor_start();
             motor_turn(65,90,1);
         }
+        else if (dig.l2 == 1 && dig.l3 == 0) {//Vasemmalle kun vain vasen keskimmäinen näkee
+            motor_start();
+            motor_turn(65,90,1);
+        }
         else if (dig.l3 == 1) {//Vasemmalle vikan sensorin käännös
             motor_start();
             motor_turn(85,100,1);
@@ -262,14 +333,22 @@ int main()
             motor_start();
             motor_turn(100,75,1);
         }
+        */
     }  
 }
 
-void motor_turnRight(uint8 l_speed,uint8 r_speed,uint32 delay) {
+void motor_turnRight(uint8 speed,uint32 delay) {
     MotorDirLeft_Write(0);
     MotorDirRight_Write(1);
-    PWM_WriteCompare1(l_speed); 
-    PWM_WriteCompare2(r_speed); 
+    PWM_WriteCompare1(speed); 
+    PWM_WriteCompare2(speed); 
+    CyDelay(delay);
+}
+void motor_turnLeft(uint8 speed,uint32 delay) {
+    MotorDirLeft_Write(1);
+    MotorDirRight_Write(0);
+    PWM_WriteCompare1(speed); 
+    PWM_WriteCompare2(speed); 
     CyDelay(delay);
 }
         
