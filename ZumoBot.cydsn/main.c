@@ -187,6 +187,7 @@ int main()
     void motor_turnRight(uint8 l_speed, uint8 r_speed, uint32 delay);
     void motor_turnLeft(uint8 l_speed, uint8 r_speed, uint32 delay);
     void motor_basicTurn (uint8 l_speed, uint8 r_speed, uint32 delay);
+    void motor_veryStraight(uint8 l_speed, uint8 r_speed, uint32 delay);
     
 int main()
 {
@@ -247,7 +248,7 @@ int main()
         }
         else if (dig.l1 == 1 && dig.r1 == 1) { // Forward
             motor_start();
-            motor_forward(250,1);
+            motor_veryStraight(250,245,1);
         }
         
         /*Versio 3
@@ -383,6 +384,13 @@ int main()
     }  
 }
 
+void motor_veryStraight(uint8 l_speed, uint8 r_speed, uint32 delay) {
+    MotorDirLeft_Write(0);
+    MotorDirRight_Write(0);
+    PWM_WriteCompare1(l_speed); 
+    PWM_WriteCompare2(r_speed); 
+    CyDelay(delay);
+}
 void motor_turnRight(uint8 l_speed, uint8 r_speed, uint32 delay) {
     MotorDirLeft_Write(0);
     MotorDirRight_Write(1);
