@@ -217,12 +217,15 @@ int main()
         reflectance_digital(&dig);      //print out 0 or 1 according to results of reflectance period
         printf("%5d %5d %5d %5d %5d %5d \r\n", dig.l3, dig.l2, dig.l1, dig.r1, dig.r2, dig.r3);  //print out 0 or 1 according to results of reflectance period
         
-//        int line;
         
         //Versio 4
         if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1) { // Stop on black line
             motor_stop();   
         }
+        else if (dig.l1 == 1 && dig.r1 == 1) { // Forward
+            motor_start();
+            motor_veryStraight(240,250,1);
+        } 
         else if (dig.r3 == 1) { // Big turn to Right
             motor_start();
             motor_turnRight(250,80,1);
@@ -246,10 +249,6 @@ int main()
         else if (dig.r1 == 1) { // Small turn to Left
             motor_start();
             motor_basicTurn(160,250,1);
-        }
-       else if (dig.l1 == 1 && dig.r1 == 1) { // Forward
-            motor_start();
-            motor_veryStraight(250,249,1);
         }
         
         /*Versio 3
