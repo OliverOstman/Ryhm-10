@@ -199,14 +199,19 @@ int main()
     CyGlobalIntEnable; 
     UART_1_Start();
     
+    IR_Start();
+    IR_flush();
+    
     reflectance_start();
     reflectance_set_threshold(9000, 9000, 11000, 11000, 9000, 9000); // set center sensor threshold to 11000 and others to 9000
     
     
     int counter = 0;
     int seen = 0;
+    int ir = 0;
+    int stop = 0;
     
-    CyDelay(5000);
+    CyDelay(4000);
     
     motor_start();
 
@@ -224,184 +229,110 @@ int main()
         reflectance_digital(&dig);      //print out 0 or 1 according to results of reflectance period
         printf("%5d %5d %5d %5d %5d %5d \r\n", dig.l3, dig.l2, dig.l1, dig.r1, dig.r2, dig.r3);  //print out 0 or 1 according to results of reflectance period
         
-        
-        //Versio 4
-        if (dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && counter == 1) { // Stop on black line
-            Beep(1000, 100);
-            motor_stop();   
+        if (dig.l3 == 1 && dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1 && ir == 0) {
+            // First line
+            motor_stop();
+            IR_wait();
+            ir = 1;
         }
-        
-        else if (dig.l3 == 1 && dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1){
-         seen=1; 
-         BatteryLed_Write(1);
+        else if (dig.l3 == 1 && dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1 && seen == 1) {
+            // Second line
+            counter = 1;
         }
-        else if(dig.l3==0 && dig.r3==0 && seen==1){
-        counter++;
-        seen=0;
-        BatteryLed_Write(0);
-            
-        }    
-        else if (dig.l1 == 1 && dig.r1 == 1) { // Forward
+        else if (dig.r3 == 1 && stop == 1) {
+            // Last line stop
+            motor_stop();
+            BatteryLed_Write(1);
+        }
+        else if (dig.r3 == 0 && counter == 1) {
+            stop = 1;
+        }
+        else if (dig.l1 == 1 && dig.r1 == 1 && stop == 0) { // Forward
             motor_start();
             motor_veryStraight(240,250,1);
-        } 
-        else if (dig.r3 == 1) { // Big turn to Right
+        }
+        else if (dig.r3 == 1 && stop == 0) { // Big turn to Right
             motor_start();
             motor_turnRight(250,80,1);
         }
-        else if (dig.l3 == 1) { // Big turn to Left
+        else if (dig.l3 == 1 && stop == 0) { // Big turn to Left
             motor_start();
             motor_turnLeft(80,250,1);
+            seen = 1;
         }
-        else if (dig.r2 == 1) { // Turn to Right
+        else if (dig.r2 == 1 && stop == 0) { // Turn to Right
             motor_start();
             motor_basicTurn(250,125,1);
         }
-        else if (dig.l2 == 1) { // Turn to Left
+        else if (dig.l2 == 1 && stop == 0) { // Turn to Left
             motor_start();
             motor_basicTurn(125,250,1);
         }
-        else if (dig.l1 == 1) { // Small turn to Right
+        else if (dig.l1 == 1 && stop == 0) { // Small turn to Right
             motor_start();
             motor_basicTurn(250,160,1);
         }
-        else if (dig.r1 == 1) { // Small turn to Left
+        else if (dig.r1 == 1 && stop == 0) { // Small turn to Left
             motor_start();
             motor_basicTurn(160,250,1);
         }
         
-        /*Versio 3
-        if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1) {
-            //Kaikki näkee mustaa
+        /*
+        //Versio 4
+        if (dig.l3 == 1 && dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1 && counter == 1) { 
+            // Stop on black line
             motor_stop();
+            stop = 1;
+            Beep(1000, 100);
         }
-        else if (dig.r3 == 1) {
-            //Oikealle
-            motor_start();
-            motor_turnRight(200,1);
+        else if (dig.l3 == 1 && dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1 && stop == 0){
+            // first black line
+            seen=1;
+            while (ir == 0) {
+                motor_stop();
+                IR_wait();
+                ir = 1;
+                motor_start();
+            }
         }
-        else if (dig.l3 == 1) {
-            //Vasemmalle
+        else if(dig.l3==0 && dig.l2 == 0 && dig.r3==0 && dig.r2 == 0 && seen==1 && stop == 0){ // 
+            counter = 1;
+            seen=0;
+            BatteryLed_Write(1);
+            BatteryLed_Write(0);
+        }    
+        else if (dig.l1 == 1 && dig.r1 == 1 && stop == 0) { // Forward
             motor_start();
-            motor_turnLeft(200,1);
+            motor_veryStraight(240,250,1);
+        } 
+        else if (dig.r3 == 1 && stop == 0) { // Big turn to Right
+            motor_start();
+            motor_turnRight(250,80,1);
         }
-        else if (dig.r2 == 1) {
-            //Oikealle
+        else if (dig.l3 == 1 && stop == 0) { // Big turn to Left
             motor_start();
-            motor_turnRight(200,1);
+            motor_turnLeft(80,250,1);
         }
-        else if (dig.l2 == 1) {
-            //Vasemmalle
+        else if (dig.r2 == 1 && stop == 0) { // Turn to Right
             motor_start();
-            motor_turnLeft(200,1);
+            motor_basicTurn(250,125,1);
         }
-        else if (dig.l1 == 1 && dig.r1 == 1) {
-            // Suoraan
+        else if (dig.l2 == 1 && stop == 0) { // Turn to Left
             motor_start();
-            motor_forward(200,1);
+            motor_basicTurn(125,250,1);
+        }
+        else if (dig.l1 == 1 && stop == 0) { // Small turn to Right
+            motor_start();
+            motor_basicTurn(250,160,1);
+        }
+        else if (dig.r1 == 1 && stop == 0) { // Small turn to Left
+            motor_start();
+            motor_basicTurn(160,250,1);
         }
         */
-        /* Versio 2
-        if (dig.l1 == 1 && dig.r3 == 1 && dig.r2 == 1 && dig.r1 == 1 && dig.l3 == 1 && dig.l2 == 1) {
-            //Kaikki näkee mustaa
-            motor_stop();
-        }
-        else if (dig.l1 == 0 && dig.r3 == 0 && dig.r2 == 0 && dig.r1 == 0 && dig.l3 == 0 && dig.l2 == 0)  {
-            //Kaikki näkee valkoista
-            motor_stop();
-        }
-        else if (dig.l1 == 1 && dig.r1 == 1 && dig.r3 == 0 && dig.r2 == 0 && dig.l3 == 0 && dig.l2 == 0) {
-            //Vain keskimmäiset näkee mustaa --> Suoraan
-            motor_start();
-            motor_turn(95,100,1);
-        }
-        else if (dig.l1 == 1 && dig.r1 == 0 && dig.r3 == 0 && dig.r2 == 0 && dig.l3 == 0 && dig.l2 == 0) {
-            //Vain keskimmäinen vasen näkee mustaa --> Korjaus vasemmalle
-            motor_start();
-            motor_turn(75,100,1);
-        }
-        else if (dig.r1 == 1 && dig.l1 == 0 && dig.r3 == 0 && dig.r2 == 0 && dig.l3 == 0 && dig.l2 == 0) {
-            //Vain keskimmäinen oikea näkee mustaa --> Korjaus oikealle
-            motor_start();
-            motor_turn(100,75,1);
-        }
-        else if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 1) { 
-            //Kaikki vasemmaiset näkee mustaa --> Kääntyy vasemmalle
-            motor_start();
-            motor_turn(35,100,1);
-        }
-        else if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 0) {
-            //Vain kaksi ekaa vasemmaista näkee mustaa --> Pienempi käännös vasemmalle
-            motor_start();
-            motor_turn(55,100,1);
-        }
-        else if (dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1) { 
-            //Kaikki oikeammaiset näkee mustaa --> Kääntyy oikealle
-            motor_start();
-            motor_turn(100,35,1);
-        }
-        else if (dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 0) {
-            //Vain kaksi ekaa oikeammaista näkee mustaa --> Pienempi käännös oikealle
-            motor_start();
-            motor_turn(100,55,1);
-        }
-        */
-        /* Versio 1
-        if (dig.l1 == 1 && dig.r3 == 1 && dig.r2 == 1 && dig.r1 == 1 && dig.l3 == 1 && dig.l2 == 1) {
-            motor_stop();
-        }
-        else if (dig.l1 == 0 && dig.r3 == 0 && dig.r2 == 0 && dig.r1 == 0 && dig.l3 == 0 && dig.l2 == 0)  {
-            motor_stop();
-        }
-        else if (dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1 && dig.l3 == 0) { //90 asteen kääntö oikealle
-            motor_start();
-            CyDelay(50);
-            motor_turnRight(100,1);
-        }
-        else if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 1) { //3 sensorin kääntö vasemmalle
-            motor_start();
-            motor_turn(100,50,1);
-        }
-        else if (dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1) { //3 sensorin kääntö oikealle
-            motor_start();
-            motor_turn(50,100,1);
-        }
-        else if (dig.r1 == 1 && dig.r2 == 1) { //Oikealle pieni
-            motor_start();
-            motor_turn(90,65,1);
-        }
-        else if (dig.l1 == 1 && dig.l2 == 1) { //Vasemmalle pieni
-            motor_start();
-            motor_turn(65,90,1);
-        }
-        else if (dig.l2 == 1 && dig.l3 == 0) {//Vasemmalle kun vain vasen keskimmäinen näkee
-            motor_start();
-            motor_turn(65,90,1);
-        }
-        else if (dig.l3 == 1) {//Vasemmalle vikan sensorin käännös
-            motor_start();
-            motor_turn(85,100,1);
-        }
-        else if (dig.r3 == 1) {//Oikealle vikan sensorin käännös
-            motor_start();
-            motor_turn(100,85,1);
-        }
-        else if (dig.l1 == 1 && dig.r1 == 1) { //Suoraan
-            motor_start();
-            //motor_turn(190,200,1);
-            motor_forward(100,1);
-        }
-        else if (dig.l1 == 1 && dig.r1 == 0) { //Korjaus oikealle
-            motor_start();
-            motor_turn(75,100,1);
-        }
-        else if (dig.r1 == 1 && dig.l1 == 0) { //Korjaus vasemmalle
-            motor_start();
-            motor_turn(100,75,1);
-        }
-        */
-    }  
+    }
 }
+        
 
 void motor_veryStraight(uint8 l_speed, uint8 r_speed, uint32 delay) {
     MotorDirLeft_Write(0);
