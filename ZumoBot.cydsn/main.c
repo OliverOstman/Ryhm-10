@@ -202,10 +202,17 @@ int main()
     reflectance_start();
     reflectance_set_threshold(9000, 9000, 11000, 11000, 9000, 9000); // set center sensor threshold to 11000 and others to 9000
     
+    
+    int counter = 0;
+    int seen = 0;
+    
     CyDelay(5000);
     
     motor_start();
 
+        //BatteryLed_Write(1); // Switch led on 
+    //BatteryLed_Write(0); // Switch led off 
+    
     for(;;)
     {
         // read raw sensor values
@@ -219,9 +226,21 @@ int main()
         
         
         //Versio 4
-        if (dig.l1 == 1 && dig.l2 == 1 && dig.l3 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1) { // Stop on black line
+        if (dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && counter == 1) { // Stop on black line
+            Beep(1000, 100);
             motor_stop();   
         }
+        
+        else if (dig.l3 == 1 && dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1){
+         seen=1; 
+         BatteryLed_Write(1);
+        }
+        else if(dig.l3==0 && dig.r3==0 && seen==1){
+        counter++;
+        seen=0;
+        BatteryLed_Write(0);
+            
+        }    
         else if (dig.l1 == 1 && dig.r1 == 1) { // Forward
             motor_start();
             motor_veryStraight(240,250,1);
