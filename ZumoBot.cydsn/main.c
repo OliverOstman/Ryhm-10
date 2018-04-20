@@ -182,7 +182,7 @@ int main()
 #endif
 
 
-#if 1
+#if 0
 //reflectance//
     void motor_turnRight(uint8 l_speed, uint8 r_speed, uint32 delay);
     void motor_turnLeft(uint8 l_speed, uint8 r_speed, uint32 delay);
@@ -249,32 +249,32 @@ int main()
         }
         else if (dig.l1 == 1 && dig.r1 == 1 && stop == 0) { // Forward
             motor_start();
-            motor_veryStraight(240,250,1);
+            motor_veryStraight(240,250,0);
         }
         else if (dig.r3 == 1 && stop == 0) { // Big turn to Right
             motor_start();
-            motor_turnRight(250,80,1);
+            motor_turnRight(250,80,0);
         }
         else if (dig.l3 == 1 && stop == 0) { // Big turn to Left
             motor_start();
-            motor_turnLeft(80,250,1);
+            motor_turnLeft(80,250,0);
             seen = 1;
         }
         else if (dig.r2 == 1 && stop == 0) { // Turn to Right
             motor_start();
-            motor_basicTurn(250,125,1);
+            motor_basicTurn(250,125,0);
         }
         else if (dig.l2 == 1 && stop == 0) { // Turn to Left
             motor_start();
-            motor_basicTurn(125,250,1);
+            motor_basicTurn(125,250,0);
         }
         else if (dig.l1 == 1 && stop == 0) { // Small turn to Right
             motor_start();
-            motor_basicTurn(250,160,1);
+            motor_basicTurn(250,160,0);
         }
         else if (dig.r1 == 1 && stop == 0) { // Small turn to Left
             motor_start();
-            motor_basicTurn(160,250,1);
+            motor_basicTurn(160,250,0);
         }
         
         /*
@@ -415,44 +415,104 @@ void motor_turnRight(uint8 l_speed,uint8 r_speed,uint32 delay) {
 }
 #endif
 
-#if 0 
- //omat jutut//
+#if 1
+ //sumo//
+    void motor_turnRight(uint8 l_speed, uint8 r_speed, uint32 delay);
+    void motor_turnLeft(uint8 l_speed, uint8 r_speed, uint32 delay);
+    void motor_basicTurn (uint8 l_speed, uint8 r_speed, uint32 delay);
+    void motor_veryStraight(uint8 l_speed, uint8 r_speed, uint32 delay);
+    
  int main()
 {
-    ADC_Battery_Start();        
+    struct sensors_ ref;
+    struct sensors_ dig;
+    
+    Systick_Start();
 
-    int16 adcresult = 0;
-    float volts = 0.0;
+    CyGlobalIntEnable; 
+    UART_1_Start();
+    Ultra_Start();
+    IR_Start();
+    IR_flush();
     
-    ADC_Battery_StartConvert();
-        if(ADC_Battery_IsEndConversion(ADC_Battery_WAIT_FOR_RESULT)) {   // wait for get ADC converted value
-            adcresult = ADC_Battery_GetResult16(); // get the ADC value (0 - 4095)
-            volts = (adcresult / 4096.0) * 5; // convert value to Volts
-            volts = volts * 1.5;
-            if (volts < 4.0) {
-                BatteryLed_Write(1);
-                CyDelay(500);
-                BatteryLed_Write(0);
-            }
-            printf("%d %.3f\r\n", adcresult, volts); // Print both ADC results and converted value
+    reflectance_start();
+    reflectance_set_threshold(9000, 9000, 11000, 11000, 9000, 9000); // set center sensor threshold to 11000 and others to 9000
+    
+    CyDelay(4000);
+    motor_start();
+    
+    int start = 0;
+    
+    for (;;) {
+        reflectance_read(&ref);
+        reflectance_digital(&dig);
+        int d = Ultra_GetDistance();
+        
+        if (dig.l3 == 1 && dig.r3 == 1 && start == 0) {
+            motor_stop();
+            IR_wait();
+            start = 1;
+            motor_start();
+            motor_veryStraight(190,200,10);
         }
-        CyDelay(500);
-    
-    void motor_turnLeft(uint8 speed,uint32 delay) {
+        else if (dig.l3 == 1 && dig.r3 == 1 && start == 1) {
+            motor_backward(200,0);
+        }
+        else if (dig.l1 == 1 && dig.r1 == 1) {
+            // Forward on black line
+            motor_veryStraight(190,200,0);
+        }
+        else if (dig.l3 == 1) {
+            motor_turnRight(190,200,0);
+        }
+        else if (dig.l2 == 1) {
+            motor_turnRight(190,200,0);
+        }
+        else if (dig.l1 == 1) {
+            motor_turnRight(190,200,0);
+        }
+        else if (dig.r3 == 1) {
+            motor_turnLeft(190,200,0);
+        }
+        else if (dig.r2 == 1) {
+            motor_turnLeft(190,200,0);
+        }
+        else if (dig.r1 == 1) {
+            motor_turnRight(190,200,0);
+        }
+        else if (dig.l1 == 0 && dig.r1 == 0) {
+            motor_veryStraight(190,200,0);
+        }
+    }
+}
+
+void motor_veryStraight(uint8 l_speed, uint8 r_speed, uint32 delay) {
+    MotorDirLeft_Write(0);
+    MotorDirRight_Write(0);
+    PWM_WriteCompare1(l_speed); 
+    PWM_WriteCompare2(r_speed); 
+    CyDelay(delay);
+}
+void motor_turnRight(uint8 l_speed, uint8 r_speed, uint32 delay) {
     MotorDirLeft_Write(0);
     MotorDirRight_Write(1);
-    PWM_WriteCompare1(speed); 
-    PWM_WriteCompare2(speed); 
+    PWM_WriteCompare1(l_speed); 
+    PWM_WriteCompare2(r_speed); 
     CyDelay(delay);
 }
-    
-    void motor_turnRight(uint8 speed,uint32 delay) {
+void motor_turnLeft(uint8 l_speed, uint8 r_speed, uint32 delay) {
     MotorDirLeft_Write(1);
     MotorDirRight_Write(0);
-    PWM_WriteCompare1(speed); 
-    PWM_WriteCompare2(speed); 
+    PWM_WriteCompare1(l_speed); 
+    PWM_WriteCompare2(r_speed); 
     CyDelay(delay);
 }
+void motor_basicTurn (uint8 l_speed, uint8 r_speed, uint32 delay) {
+    MotorDirLeft_Write(0);
+    MotorDirRight_Write(0);
+    PWM_WriteCompare1(l_speed); 
+    PWM_WriteCompare2(r_speed); 
+    CyDelay(delay);
 }
 #endif
 /* [] END OF FILE */
