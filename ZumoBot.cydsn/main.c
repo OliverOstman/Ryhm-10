@@ -182,7 +182,7 @@ int main()
 #endif
 
 
-#if 0
+#if 1
 //reflectance//
     void motor_turnRight(uint8 l_speed, uint8 r_speed, uint32 delay);
     void motor_turnLeft(uint8 l_speed, uint8 r_speed, uint32 delay);
@@ -262,19 +262,19 @@ int main()
         }
         else if (dig.r2 == 1 && stop == 0) { // Turn to Right
             motor_start();
-            motor_basicTurn(250,125,0);
+            motor_basicTurn(250,145,0);
         }
         else if (dig.l2 == 1 && stop == 0) { // Turn to Left
             motor_start();
-            motor_basicTurn(125,250,0);
+            motor_basicTurn(145,250,0);
         }
         else if (dig.l1 == 1 && stop == 0) { // Small turn to Right
             motor_start();
-            motor_basicTurn(250,160,0);
+            motor_basicTurn(250,210,0);
         }
         else if (dig.r1 == 1 && stop == 0) { // Small turn to Left
             motor_start();
-            motor_basicTurn(160,250,0);
+            motor_basicTurn(210,250,0);
         }
         
         /*
@@ -415,7 +415,7 @@ void motor_turnRight(uint8 l_speed,uint8 r_speed,uint32 delay) {
 }
 #endif
 
-#if 1
+#if 0
  //sumo//
     void motor_turnRight(uint8 l_speed, uint8 r_speed, uint32 delay);
     void motor_turnLeft(uint8 l_speed, uint8 r_speed, uint32 delay);
