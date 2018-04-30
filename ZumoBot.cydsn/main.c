@@ -182,7 +182,7 @@ int main()
 #endif
 
 
-#if 0
+#if 1
 //Line follower//
     void motor_turnRight(uint8 l_speed, uint8 r_speed, uint32 delay);
     void motor_turnLeft(uint8 l_speed, uint8 r_speed, uint32 delay);
@@ -210,6 +210,8 @@ int main()
     int seen = 0;
     int ir = 0;
     int stop = 0;
+    int a = 100;
+    int b = 100;
     
     CyDelay(4000);
     
@@ -234,12 +236,14 @@ int main()
             motor_stop();
             IR_wait();
             ir = 1;
+            a = 240;
+            b = 250;
         }
         else if (dig.l3 == 1 && dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1 && seen == 1) {
             // Second line
             counter = 1;
         }
-        else if (dig.r3 == 1 && stop == 1) {
+        else if (dig.r2 == 1 && dig.l2 == 1 && stop == 1) {
             // Last line stop
             motor_stop();
             BatteryLed_Write(1);
@@ -249,7 +253,7 @@ int main()
         }
         else if (dig.l1 == 1 && dig.r1 == 1 && stop == 0) { // Forward
             motor_start();
-            motor_veryStraight(240,250,0);
+            motor_veryStraight(a,b,0);
         }
         else if (dig.r3 == 1 && stop == 0) { // Big turn to Right
             motor_start();
@@ -365,7 +369,7 @@ void motor_basicTurn (uint8 l_speed, uint8 r_speed, uint32 delay) {
         
 #endif
 
-#if 1
+#if 0
  //sumo//
     void motor_turnRight(uint8 l_speed, uint8 r_speed, uint32 delay);
     void motor_turnLeft(uint8 l_speed, uint8 r_speed, uint32 delay);
