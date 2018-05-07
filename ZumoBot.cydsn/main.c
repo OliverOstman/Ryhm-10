@@ -213,7 +213,6 @@ int main()
     int a = 100;
     int b = 100;
     
-    CyDelay(4000);
     
     motor_start();
 
@@ -280,60 +279,6 @@ int main()
             motor_start();
             motor_basicTurn(160,250,0);
         }
-        
-        /*
-        //Versio 4
-        if (dig.l3 == 1 && dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1 && counter == 1) { 
-            // Stop on black line
-            motor_stop();
-            stop = 1;
-            Beep(1000, 100);
-        }
-        else if (dig.l3 == 1 && dig.l2 == 1 && dig.l1 == 1 && dig.r1 == 1 && dig.r2 == 1 && dig.r3 == 1 && stop == 0){
-            // first black line
-            seen=1;
-            while (ir == 0) {
-                motor_stop();
-                IR_wait();
-                ir = 1;
-                motor_start();
-            }
-        }
-        else if(dig.l3==0 && dig.l2 == 0 && dig.r3==0 && dig.r2 == 0 && seen==1 && stop == 0){ // 
-            counter = 1;
-            seen=0;
-            BatteryLed_Write(1);
-            BatteryLed_Write(0);
-        }    
-        else if (dig.l1 == 1 && dig.r1 == 1 && stop == 0) { // Forward
-            motor_start();
-            motor_veryStraight(240,250,1);
-        } 
-        else if (dig.r3 == 1 && stop == 0) { // Big turn to Right
-            motor_start();
-            motor_turnRight(250,80,1);
-        }
-        else if (dig.l3 == 1 && stop == 0) { // Big turn to Left
-            motor_start();
-            motor_turnLeft(80,250,1);
-        }
-        else if (dig.r2 == 1 && stop == 0) { // Turn to Right
-            motor_start();
-            motor_basicTurn(250,125,1);
-        }
-        else if (dig.l2 == 1 && stop == 0) { // Turn to Left
-            motor_start();
-            motor_basicTurn(125,250,1);
-        }
-        else if (dig.l1 == 1 && stop == 0) { // Small turn to Right
-            motor_start();
-            motor_basicTurn(250,160,1);
-        }
-        else if (dig.r1 == 1 && stop == 0) { // Small turn to Left
-            motor_start();
-            motor_basicTurn(160,250,1);
-        }
-        */
     }
 }
         
